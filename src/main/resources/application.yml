@@ -1,10 +1,8 @@
 spring:
   application:
     name: engagement-service
-  data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://engagement_service:engagement_service@localhost:27018/engagement_db?authSource=admin}
-      auto-index-creation: true
+  mongodb:
+    uri: ${MONGO_URI:mongodb://engagement_service:engagement_service@localhost:27017/engagement_db?authSource=admin}
 
 eureka:
   client:
