@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.history.dto.BrowsingHistoryResponse;
 import pl.dybcio.ordered.history.dto.RecordViewRequest;
 import pl.dybcio.ordered.history.service.BrowsingHistoryService;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
 @RequestMapping("/api/v1/browsing-history")

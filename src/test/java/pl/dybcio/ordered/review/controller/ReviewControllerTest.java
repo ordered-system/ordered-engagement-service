@@ -26,11 +26,12 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pl.dybcio.ordered.common.exception.GlobalExceptionHandler;
+import pl.dybcio.ordered.commons.exception.CommonExceptionHandler;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.review.entity.Review;
 import pl.dybcio.ordered.review.service.DuplicateReviewException;
 import pl.dybcio.ordered.review.service.ProductNotPurchasedException;
 import pl.dybcio.ordered.review.service.ReviewService;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewControllerTest {
@@ -46,7 +47,7 @@ class ReviewControllerTest {
     ReviewController controller = new ReviewController(reviewService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(new GlobalExceptionHandler())
+            .setControllerAdvice(new GlobalExceptionHandler(), new CommonExceptionHandler())
             .setCustomArgumentResolvers(
                 new AuthenticationPrincipalArgumentResolver(),
                 new PageableHandlerMethodArgumentResolver())

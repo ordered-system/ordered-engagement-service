@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.dybcio.ordered.common.dto.PageResponse;
+import pl.dybcio.ordered.commons.dto.PageResponse;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.review.dto.ReviewRequest;
 import pl.dybcio.ordered.review.dto.ReviewResponse;
 import pl.dybcio.ordered.review.entity.Review;
 import pl.dybcio.ordered.review.service.ReviewService;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
 @RequestMapping("/api/v1/reviews")

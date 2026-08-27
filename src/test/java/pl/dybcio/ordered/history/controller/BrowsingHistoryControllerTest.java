@@ -25,9 +25,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.history.entity.BrowsingHistoryEntry;
 import pl.dybcio.ordered.history.service.BrowsingHistoryService;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @ExtendWith(MockitoExtension.class)
 class BrowsingHistoryControllerTest {
