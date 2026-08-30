@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pl.dybcio.ordered.review.client.PurchaseVerificationException;
 import pl.dybcio.ordered.review.service.DuplicateReviewException;
 import pl.dybcio.ordered.review.service.ProductNotPurchasedException;
 
@@ -22,14 +21,6 @@ public class GlobalExceptionHandler {
   public ProblemDetail handleDuplicateReview(DuplicateReviewException ex) {
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     pd.setTitle("Already reviewed");
-    return pd;
-  }
-
-  @ExceptionHandler(PurchaseVerificationException.class)
-  public ProblemDetail handlePurchaseVerificationFailure(PurchaseVerificationException ex) {
-    ProblemDetail pd =
-        ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
-    pd.setTitle("Could not verify purchase");
     return pd;
   }
 }

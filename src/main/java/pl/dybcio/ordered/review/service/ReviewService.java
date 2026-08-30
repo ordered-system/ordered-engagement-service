@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import pl.dybcio.ordered.review.client.OrderServiceClient;
+import pl.dybcio.ordered.purchase.repository.VerifiedPurchaseRepository;
 import pl.dybcio.ordered.review.dto.ReviewRequest;
 import pl.dybcio.ordered.review.entity.Review;
 import pl.dybcio.ordered.review.repository.ReviewRepository;
@@ -15,10 +15,11 @@ import pl.dybcio.ordered.review.repository.ReviewRepository;
 public class ReviewService {
 
   private final ReviewRepository reviewRepository;
-  private final OrderServiceClient orderServiceClient;
+  private final VerifiedPurchaseRepository verifiedPurchaseRepository;
 
   public Review addReview(Long userId, String userEmail, ReviewRequest request) {
-    boolean purchased = orderServiceClient.hasPurchased(userId, request.productId());
+    boolean purchased =
+        verifiedPurchaseRepository.existsByUserIdAndProductId(userId, request.productId());
     if (!purchased) {
       throw new ProductNotPurchasedException(request.productId());
     }

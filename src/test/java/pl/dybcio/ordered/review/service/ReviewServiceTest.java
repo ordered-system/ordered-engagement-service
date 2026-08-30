@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.dybcio.ordered.review.client.OrderServiceClient;
+import pl.dybcio.ordered.purchase.repository.VerifiedPurchaseRepository;
 import pl.dybcio.ordered.review.dto.ReviewRequest;
 import pl.dybcio.ordered.review.entity.Review;
 import pl.dybcio.ordered.review.repository.ReviewRepository;
@@ -18,20 +18,20 @@ import pl.dybcio.ordered.review.repository.ReviewRepository;
 class ReviewServiceTest {
 
   @Mock private ReviewRepository reviewRepository;
-  @Mock private OrderServiceClient orderServiceClient;
+  @Mock private VerifiedPurchaseRepository verifiedPurchaseRepository;
 
   private ReviewService reviewService;
 
   private ReviewService service() {
     if (reviewService == null) {
-      reviewService = new ReviewService(reviewRepository, orderServiceClient);
+      reviewService = new ReviewService(reviewRepository, verifiedPurchaseRepository);
     }
     return reviewService;
   }
 
   @Test
-  void addReview_throwsProductNotPurchased_whenBuyerNeverReceivedTheProduct() {
-    when(orderServiceClient.hasPurchased(42L, 10L)).thenReturn(false);
+  void addReview_throwsProductNotPurchased_whenNoVerifiedPurchaseOnRecord() {
+    when(verifiedPurchaseRepository.existsByUserIdAndProductId(42L, 10L)).thenReturn(false);
 
     ReviewRequest request = new ReviewRequest(10L, 5, "Great!");
 
@@ -43,7 +43,7 @@ class ReviewServiceTest {
 
   @Test
   void addReview_throwsDuplicateReview_whenAlreadyReviewed() {
-    when(orderServiceClient.hasPurchased(42L, 10L)).thenReturn(true);
+    when(verifiedPurchaseRepository.existsByUserIdAndProductId(42L, 10L)).thenReturn(true);
     when(reviewRepository.existsByUserIdAndProductId(42L, 10L)).thenReturn(true);
 
     ReviewRequest request = new ReviewRequest(10L, 5, "Great!");
@@ -55,8 +55,8 @@ class ReviewServiceTest {
   }
 
   @Test
-  void addReview_savesReview_whenPurchasedAndNotYetReviewed() {
-    when(orderServiceClient.hasPurchased(42L, 10L)).thenReturn(true);
+  void addReview_savesReview_whenPurchaseVerifiedAndNotYetReviewed() {
+    when(verifiedPurchaseRepository.existsByUserIdAndProductId(42L, 10L)).thenReturn(true);
     when(reviewRepository.existsByUserIdAndProductId(42L, 10L)).thenReturn(false);
     when(reviewRepository.save(any(Review.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -68,19 +68,5 @@ class ReviewServiceTest {
     assertThat(result.getUserEmail()).isEqualTo("adam@example.com");
     assertThat(result.getRating()).isEqualTo(5);
     assertThat(result.getCreatedAt()).isNotNull();
-  }
-
-  @Test
-  void addReview_propagatesPurchaseVerificationException_whenOrderServiceUnavailable() {
-    when(orderServiceClient.hasPurchased(42L, 10L))
-        .thenThrow(
-            new pl.dybcio.ordered.review.client.PurchaseVerificationException(42L, "unavailable"));
-
-    ReviewRequest request = new ReviewRequest(10L, 5, "Great!");
-
-    assertThatThrownBy(() -> service().addReview(42L, "adam@example.com", request))
-        .isInstanceOf(pl.dybcio.ordered.review.client.PurchaseVerificationException.class);
-
-    verifyNoInteractions(reviewRepository);
   }
 }

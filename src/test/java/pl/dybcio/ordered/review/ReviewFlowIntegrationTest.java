@@ -2,7 +2,6 @@ package pl.dybcio.ordered.review;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.when;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -26,11 +25,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import pl.dybcio.ordered.review.client.OrderServiceClient;
+import pl.dybcio.ordered.purchase.entity.VerifiedPurchase;
+import pl.dybcio.ordered.purchase.repository.VerifiedPurchaseRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -46,11 +45,10 @@ class ReviewFlowIntegrationTest {
   static void extraProperties(DynamicPropertyRegistry registry) {
     registry.add("eureka.client.enabled", () -> "false");
     registry.add("app.jwt.secret", () -> JWT_SECRET);
-    registry.add("app.order-service.base-url", () -> "http://localhost:1");
   }
 
   @Autowired private TestRestTemplate restTemplate;
-  @MockitoBean private OrderServiceClient orderServiceClient;
+  @Autowired private VerifiedPurchaseRepository verifiedPurchaseRepository;
 
   private String jwtFor(long userId, String email) {
     SecretKey key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
@@ -75,7 +73,8 @@ class ReviewFlowIntegrationTest {
   @Test
   void addReview_thenSecondAttemptOnSameProduct_returns409() {
     String token = jwtFor(42L, "adam@example.com");
-    when(orderServiceClient.hasPurchased(42L, 10L)).thenReturn(true);
+    verifiedPurchaseRepository.save(
+        VerifiedPurchase.builder().userId(42L).productId(10L).orderId(1L).build());
 
     ResponseEntity<String> first =
         restTemplate.postForEntity(
@@ -103,7 +102,6 @@ class ReviewFlowIntegrationTest {
   @Test
   void addReview_returns403_whenProductNotPurchased() {
     String token = jwtFor(43L, "notabuyer@example.com");
-    when(orderServiceClient.hasPurchased(43L, 20L)).thenReturn(false);
 
     ResponseEntity<String> response =
         restTemplate.postForEntity(

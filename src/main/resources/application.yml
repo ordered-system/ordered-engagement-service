@@ -3,6 +3,15 @@ spring:
     name: engagement-service
   mongodb:
     uri: ${MONGO_URI:mongodb://engagement_service:engagement_service@localhost:27017/engagement_db?authSource=admin}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    consumer:
+      group-id: ordered-engagement-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    listener:
+      observation-enabled: true
 
 eureka:
   client:
@@ -17,10 +26,19 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4318/v1/traces}
 
 server:
   port: ${PORT:9094}
@@ -28,22 +46,3 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET:change-me-in-prod-min-256-bits-long-please-replace}
-  order-service:
-    base-url: ${ORDER_SERVICE_URL:http://localhost:9091}
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      orderService:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
-  retry:
-    instances:
-      orderService:
-        max-attempts: 3
-        wait-duration: 500ms
-        retry-exceptions:
-          - java.io.IOException
-          - org.springframework.web.client.ResourceAccessException
