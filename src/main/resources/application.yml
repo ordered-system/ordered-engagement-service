@@ -1,6 +1,11 @@
 spring:
   application:
     name: engagement-service
+  config:
+    import: "configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  cloud:
+    config:
+      fail-fast: true
   mongodb:
     uri: ${MONGO_URI:mongodb://engagement_service:engagement_service@localhost:27017/engagement_db?authSource=admin}
   kafka:
@@ -43,6 +48,3 @@ management:
 server:
   port: ${PORT:9094}
 
-app:
-  jwt:
-    secret: ${JWT_SECRET:change-me-in-prod-min-256-bits-long-please-replace}
