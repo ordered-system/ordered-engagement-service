@@ -47,4 +47,5 @@ management:
 
 server:
   port: ${PORT:9094}
+  forward-headers-strategy: framework
 
